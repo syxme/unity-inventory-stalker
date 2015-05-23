@@ -2,7 +2,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Module 		: inventory.js
 //	Created 	: 24.07.2014
-//  Modified 	: 23.12.2014
+//	Modified 	: 23.12.2014
 //	Author		: Dmitry Shebaldin
 //	Description : Inventory
 ////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ class Element{
 				out = Vector2(65,64);
 				break;	
 		}
-		out.x +=1;
+		//out.x +=1;
 		return out;
 	}
 }
@@ -120,10 +120,10 @@ class mathfWindow{
 		ScaleIcons = windowSize.x * 0.00156;
 		border = ((SCRWidth-300)*0.1)*0.0085;
 		inf.actorMoney = Rect(Mathf.FloorToInt(SCRWidth*0.722),Mathf.FloorToInt(Screen.height*0.63),100,30);
-		//Rect(Screen.width*0.396,35+((Screen.height)*TOP),windowSize.x-SizeBorder.x*2,200);
-		inf.name = Rect(Screen.width*0.396,35+((Screen.height)*0.445),160,30);
+		inf.name	= Rect(Screen.width*0.396,35+((Screen.height)*0.445),Screen.width/6.21,30);
+		inf.price	= Rect(Screen.width*0.57,35+((Screen.height)*0.445),Screen.width/10.6,30);
 		inf.description = Rect(SCRWidth*0.396,35+((Screen.height)*0.525),windowSize.x-SizeBorder.x*2,200);
-		inf.price = Rect(SCRWidth*0.55,35+((Screen.height)*0.445),160,30);
+		
 		activeBackDrop = Rect(100,0,SCRWidth-200,137);
 		backDrop = Rect(50,140,  SCRWidth-100, Screen.height-200);
 		scrollLengthNext = 64*ScaleIcons;
@@ -169,6 +169,7 @@ private var goodShop = false;
 private var ShopGm:GameObject;
 var TOP = 0.00;
 var roots = Rect;
+var IMX:Texture2D;
 
 function Start(){
 		Actives = new Element[3];
@@ -352,6 +353,27 @@ function CalcElement(){
 				items[j]= x;		
 			}		
 		}
+	}
+	var widthm = 640;
+	var xt = 0; 
+	for (i= 0;i<=items.Length-2;i++){
+		var ix = items[i].items[0].ISGet().x;
+		var iy = items[i].items[0].ISGet().y;
+		if (xt+ix < widthm){
+			xt +=ix;
+		}else {
+			print('FFFFFF');
+			for (j = i;j<=items.Length-2;j++){
+				if (xt+items[j].items[0].ISGet().x == widthm){
+					x = items[i];
+					items[i] = items[j];
+					items[j]= x;
+					xt = 0;
+					break;
+				}
+			}
+		}
+
 
 	}
 	
@@ -371,6 +393,7 @@ function insertToScene(insertScene:GameObject,it:Element){
 }
 function insertToInventory(insertScene:GameObject,type:IT,res:boolean){
 	if (!res||type!=IT.Passive){
+		insertScene.SetActive(false);
 		var g = new GameObject(insertScene.name);
 		g.transform.parent = transform;
 		g.transform.localPosition=Vector3.zero;
@@ -380,7 +403,7 @@ function insertToInventory(insertScene:GameObject,type:IT,res:boolean){
 		insertScene.transform.parent=g.transform;
 		insertScene.transform.localPosition=Vector3.zero;
 		insertScene.transform.localRotation=Quaternion.identity;
-		insertScene.SetActive(false);
+		
 	}else{
 		Destroy(insertScene);
 	}
@@ -666,40 +689,7 @@ function DrawTiled (rect:Rect,tex:Texture2D,size:float,count:int) {
 	}
 	GUI.EndGroup();
 } 
-/*function placeElement(cx:int,cy:int,maxX:int,maxY:int,item:Vector2,cb:Function) {
-	cx+=item.x;
-	if (maxY <= item.y){
-		maxY = item.y;
-		maxX += item.x;
-	}	
-	if (maxX==mtp.windowSize.x){maxX=0;}
-	if(mtp.round_to(cx+item.x)>mtp.round_to(mtp.windowSize.x)){
-		cx=maxX;
-		cy+=item.y;
-		if (cy+item.y>=cy+maxY){
-			cx=0;				
-		}
-		maxX = 0; maxY = 0;
-													
-	}
-  cb(cx,cy,maxX,maxY);
-}*/
-function placeElement(idx:int,currentX:int,currentY:int,maxX:int,maxY:int,item:Vector2,cb:Function) {
 
-	
-	if(mtp.round_to(currentX+item.x)>mtp.round_to(mtp.windowSize.x)){
-		currentX=0;
-		currentY+=item.y;
-		if (currentY+item.y>=currentY+maxY){
-			currentX=0;				
-		}
-		maxX = 0; maxY = 0;
-													
-	}else{
-		currentX+=item.x;
-	}
-  cb(currentX,currentY,maxX,maxY);
-}
 function OnGUI(){
 	if (!showShop&&!goodShop)
 		noShop();
@@ -710,10 +700,15 @@ function OnGUI(){
 	//==================================================================================
 	GUI.DrawTexture(Rect(Screen.width/2-16,Screen.height/2-16,32,32),TxGUI.center);
 	
+
 	if (showGUI){
-		var index = 0; maxX = 0; maxY = 0;
-		var currentX=0; var currentY=0;
+		var index = 0; 
+		maxX = 0; 
+		maxY = 0;
+		var idx = 0; var ix = 0.0; var iy = 0.0;
+		var currentX = 0; var currentY = 0;
 		GUI.BeginGroup (Rect (mtp.slise,0,mtp.SCRWidth,Screen.height));
+		GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
 		showShop = false;
 		gameControl.ActivateGUI = true;
 		GUI.DrawTexture(mtp.activeBackDrop,TxGUI.activeBackDrop,ScaleMode.StretchToFill);		
@@ -728,8 +723,7 @@ function OnGUI(){
 				}
 			}
 		}
-
-		
+	
 		if (Actives[1].name!="NULLITEM"){
 			if (GUI.Button(Rect((mtp.SCRWidth-300)*0.38,10,Actives[1].ISGet().x,Actives[1].ISGet().y),Actives[1].sprite,TxGUI.Gui)){
 				if (Time.time> dclick+0.3){
@@ -739,6 +733,7 @@ function OnGUI(){
 				} 
 			}
 		}
+
 		if (Actives[2].name!="NULLITEM"){
 			if (GUI.Button(Rect(mtp.windowSize.x+mtp.SCRWidth*0.525,Screen.height*0.3,TxGUI.StandartArmor.width,TxGUI.StandartArmor.height),Actives[2].option.big_pre,TxGUI.Gui)){
 				if (Time.time> dclick+0.3){
@@ -750,10 +745,9 @@ function OnGUI(){
 		}else{
 			GUI.DrawTexture(Rect(mtp.windowSize.x+mtp.SCRWidth*0.515,Screen.height*0.3,TxGUI.StandartArmor.width,TxGUI.StandartArmor.height),TxGUI.StandartArmor,ScaleMode.StretchToFill);	
 		}
-		
-		var cX = 0; var idx = 0;
-		
+				
 		if (passActive.length>0){
+			var cX = 0; var cY = 0; 
 			for(var item in passActive){
 				if (GUI.Button(Rect(cX+(mtp.SCRWidth*0.565),40,mtp.scrollLengthNext,mtp.scrollLengthNext),item.sprite,TxGUI.Gui)){
 					if (Time.time> dclick+0.3)dclick = Time.time;	else	dropToPassActive(idx);
@@ -763,16 +757,26 @@ function OnGUI(){
 		}
 		
 		scrollPosition = GUI.BeginScrollView (Rect (50+mtp.SizeBorder.x,mtp.topout,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
-		if (scrollLength<mtp.windowSize.y) scrollLength=mtp.windowSize.y;
-		DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
-		scrollLength = 0;
-		
-		// Распределение элементов
-		for(var item in items){
-			//КНОПКА	
-			placeElement(index,currentX,currentY,maxX,maxY,Vector2(item.items[0].ISGet().x*mtp.ScaleIcons,item.items[0].ISGet().y*mtp.ScaleIcons),function(cx,cy,mX,mY){
-				
-				if (GUI.Button(Rect(currentX,currentY,item.items[0].ISGet().x*mtp.ScaleIcons,item.items[0].ISGet().y*mtp.ScaleIcons),item.items[0].sprite,TxGUI.Gui)){
+			GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
+			if (scrollLength<mtp.windowSize.y) scrollLength=mtp.windowSize.y;
+			DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
+			scrollLength = 0;
+			
+
+			for(var item in items){
+				ix = (item.items[0].ISGet().x+1)*mtp.ScaleIcons;
+				iy = item.items[0].ISGet().y*mtp.ScaleIcons;
+				if (maxX==mtp.windowSize.x){maxX=0;}
+				if (mtp.round_to(currentX+ix)>mtp.round_to(mtp.windowSize.x)){
+					currentX=maxX;
+					currentY+=iy;
+					if (currentY+iy>=currentY+maxY){
+						currentX=0;				
+					}
+					maxX = 0; maxY = 0;											
+				}
+
+				if (GUI.Button(Rect(currentX,currentY,ix,iy),item.items[0].sprite,TxGUI.Gui)){
 					selected = index;
 					if (Time.time> dclick+0.3){
 						dclick = Time.time;	
@@ -781,31 +785,34 @@ function OnGUI(){
 						dclick = Time.time;	
 					}
 				}
-			if (item.count>1)
+				if (item.count>1)
 					GUI.Label(Rect(currentX+5,currentY,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString());	
-				currentX = cx;
-				currentY = cy;
-				maxX = mX;
-				maxY = mY;
-			});
-			
-			
-			
-
-			index++;
-			
-		}
-		scrollLength = mtp.scrollLengthNext + currentY + maxY;
+					
+				currentX+=ix;
+				if (maxY <= iy){
+					maxY = iy;
+					maxX += ix;
+				}	
+				index++;		
+			}
+			scrollLength = mtp.scrollLengthNext + currentY + maxY;
 		GUI.EndScrollView ();
 
-			GUI.Label(mtp.inf.actorMoney, gameControl.actorMoney.ToString() ,TxGUI.GuiText);
+		GUI.Label(mtp.inf.actorMoney, gameControl.actorMoney.ToString() ,TxGUI.GuiText);
 		if (selected>=0){
-		var gid =  Rect(Screen.width*0.396,35+((Screen.height)*TOP),windowSize.x-SizeBorder.x*2,200);
-			GUI.Label(mtp.inf.name, items[selected].items[0].option.name,TxGUI.GuiText);
-			GUI.Label(mtp.inf.description, items[selected].items[0].option.description);
-			GUI.Label(mtp.inf.price, items[selected].items[0].option.price.ToString(),TxGUI.GuiText);
-			GUI.DrawTexture(Rect(mtp.SCRWidth*0.57,37+(Screen.height*0.501),Mathf.FloorToInt((mtp.SCRWidth/10.3)/100*items[selected].items[0].option.status),4),TxGUI.slider);
-			GUI.DrawTexture(Rect((mtp.SCRWidth*0.53)-(items[selected].items[0].ISGet().x/2),Screen.height*0.26,items[selected].items[0].ISGet().x,items[selected].items[0].ISGet().y),items[selected].items[0].sprite,ScaleMode.StretchToFill);
+			var itm = items[selected].items[0];
+			GUI.DrawTexture(mtp.inf.name,IMX);
+			GUI.Label(mtp.inf.name, itm.option.name,TxGUI.GuiText);
+			GUI.DrawTexture(mtp.inf.description,IMX);
+			//GUI.DrawTexture(,IMX);
+			GUI.Label(mtp.inf.description, itm.option.description);
+			GUI.DrawTexture(mtp.inf.price,IMX);
+			GUI.Label(mtp.inf.price, itm.option.price.ToString(),TxGUI.GuiText);
+
+			GUI.DrawTexture(Rect(mtp.SCRWidth*0.57,37+(Screen.height*0.501),Mathf.FloorToInt((mtp.SCRWidth/10.3)/100*itm.option.status),4),IMX);
+			GUI.DrawTexture(Rect(mtp.SCRWidth*0.57,37+(Screen.height*0.501),Mathf.FloorToInt((mtp.SCRWidth/10.3)/100*itm.option.status),4),TxGUI.slider);
+			GUI.DrawTexture(Rect((mtp.SCRWidth*0.53)-(itm.ISGet().x/2),Screen.height*0.26,itm.ISGet().x,itm.ISGet().y),IMX);
+			GUI.DrawTexture(Rect((mtp.SCRWidth*0.53)-(itm.ISGet().x/2),Screen.height*0.26,itm.ISGet().x,itm.ISGet().y),itm.sprite,ScaleMode.StretchToFill);
 		}
 		GUI.EndGroup ();
 	}
