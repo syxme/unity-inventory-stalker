@@ -85,6 +85,7 @@ class mathfWindow{
 	var SCRWidth:float;
 	var slise:float;
 	var windowSize:Vector2;
+	var windowSizeP:Vector2;
 	var SizeBorder:Vector2;
 	var ScaleIcons:float;
 	var Actives:Rect[];
@@ -116,6 +117,8 @@ class mathfWindow{
 		slise = (Screen.width - SCRWidth)/2;
 		/////////////////////
 		windowSize.x = (SCRWidth-100)*0.325;
+		windowSizeP.x = (SCRWidth-100)*0.26; 
+		windowSizeP.y =  (Screen.height-200)*0.86;
 		windowSize.y = (Screen.height-200)*0.92;
 		ScaleIcons = windowSize.x * 0.00156;
 		border = ((SCRWidth-300)*0.1)*0.0085;
@@ -274,7 +277,7 @@ function APIeditItemCount(name:String,count:int){
 }
 //******************************************
 //Добавить элемент к массиву
-//******************************************
+//******************************************]
 function toArray(Item:Element){
 	var res = false;
 	var id = -1;
@@ -343,6 +346,7 @@ function drArrayPass(index:int){
 //******************************************
 //Просчёт позиций 
 //******************************************
+
 function CalcElement(){
 	var x:massElement;
 	for (var i= 0;i<=items.Length-2;i++){
@@ -355,28 +359,28 @@ function CalcElement(){
 		}
 	}
 	var widthm = 640;
-	var xt = 0; 
+	var xt = 0; var maxY = 0;
 	for (i= 0;i<=items.Length-2;i++){
 		var ix = items[i].items[0].ISGet().x;
 		var iy = items[i].items[0].ISGet().y;
+		if (iy>maxY){
+			maxY = iy;
+		}
 		if (xt+ix < widthm){
 			xt +=ix;
 		}else {
-			print('FFFFFF');
 			for (j = i;j<=items.Length-2;j++){
 				if (xt+items[j].items[0].ISGet().x == widthm){
 					x = items[i];
 					items[i] = items[j];
 					items[j]= x;
 					xt = 0;
+					maxY = 0;
 					break;
 				}
 			}
 		}
-
-
 	}
-	
 }
 //******************************************
 //создание и удаление объекта на сцене
@@ -708,7 +712,7 @@ function OnGUI(){
 		var idx = 0; var ix = 0.0; var iy = 0.0;
 		var currentX = 0; var currentY = 0;
 		GUI.BeginGroup (Rect (mtp.slise,0,mtp.SCRWidth,Screen.height));
-		GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
+
 		showShop = false;
 		gameControl.ActivateGUI = true;
 		GUI.DrawTexture(mtp.activeBackDrop,TxGUI.activeBackDrop,ScaleMode.StretchToFill);		
@@ -757,7 +761,6 @@ function OnGUI(){
 		}
 		
 		scrollPosition = GUI.BeginScrollView (Rect (50+mtp.SizeBorder.x,mtp.topout,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
-			GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
 			if (scrollLength<mtp.windowSize.y) scrollLength=mtp.windowSize.y;
 			DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
 			scrollLength = 0;
@@ -801,17 +804,10 @@ function OnGUI(){
 		GUI.Label(mtp.inf.actorMoney, gameControl.actorMoney.ToString() ,TxGUI.GuiText);
 		if (selected>=0){
 			var itm = items[selected].items[0];
-			GUI.DrawTexture(mtp.inf.name,IMX);
 			GUI.Label(mtp.inf.name, itm.option.name,TxGUI.GuiText);
-			GUI.DrawTexture(mtp.inf.description,IMX);
-			//GUI.DrawTexture(,IMX);
 			GUI.Label(mtp.inf.description, itm.option.description);
-			GUI.DrawTexture(mtp.inf.price,IMX);
 			GUI.Label(mtp.inf.price, itm.option.price.ToString(),TxGUI.GuiText);
-
-			GUI.DrawTexture(Rect(mtp.SCRWidth*0.57,37+(Screen.height*0.501),Mathf.FloorToInt((mtp.SCRWidth/10.3)/100*itm.option.status),4),IMX);
 			GUI.DrawTexture(Rect(mtp.SCRWidth*0.57,37+(Screen.height*0.501),Mathf.FloorToInt((mtp.SCRWidth/10.3)/100*itm.option.status),4),TxGUI.slider);
-			GUI.DrawTexture(Rect((mtp.SCRWidth*0.53)-(itm.ISGet().x/2),Screen.height*0.26,itm.ISGet().x,itm.ISGet().y),IMX);
 			GUI.DrawTexture(Rect((mtp.SCRWidth*0.53)-(itm.ISGet().x/2),Screen.height*0.26,itm.ISGet().x,itm.ISGet().y),itm.sprite,ScaleMode.StretchToFill);
 		}
 		GUI.EndGroup ();
@@ -825,16 +821,27 @@ function OnGUI(){
 		maxX = 0; maxY = 0; 
 		GUI.BeginGroup (Rect (mtp.slise,0,mtp.SCRWidth,Screen.height));
 		GUI.DrawTexture(mtp.backDrop,TxGUI.backDropPay,ScaleMode.StretchToFill);
-		print(mtp.SizeBorder.x);
-		scrollPosition = GUI.BeginScrollView (Rect (mtp.SizeBorder.x,TxGUI.activeBackDrop.height+20,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
 
-		DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
-		//GUI.DrawTextureWithTexCoords (Rect(0,0,mtp.windowSize.x,scrollLength), TxGUI.grid, Rect(0, 0,8.05,scrollLength/(TxGUI.grid.height*mtp.ScaleIcons)));
+		//scrollPosition = GUI.BeginScrollView (Rect (mtp.SizeBorder.x,TxGUI.activeBackDrop.height+20,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
+		scrollPosition = GUI.BeginScrollView (Rect (65+mtp.SizeBorder.x,mtp.topout+25,mtp.windowSizeP.x, mtp.windowSizeP.y),scrollPosition, Rect (0, 0, 0, scrollLength));
+		if (scrollLength<mtp.windowSize.y) scrollLength=mtp.windowSizeP.y;
+		DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,8);
+		//GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
 		scrollLength = 0;
-		// Распределение элементов
+
 		for(var item in items){
-			//КНОПКА	
-			if (GUI.Button(Rect(currentX,currentY,item.items[0].ISGet().x*mtp.ScaleIcons,item.items[0].ISGet().y*mtp.ScaleIcons),item.items[0].sprite,TxGUI.Gui)){
+			ix = (item.items[0].ISGet().x+1)*mtp.ScaleIcons;
+			iy = item.items[0].ISGet().y*mtp.ScaleIcons;
+			if (maxX==mtp.windowSizeP.x){maxX=0;}
+			if (mtp.round_to(currentX+ix)>mtp.round_to(mtp.windowSizeP.x)){
+				currentX=maxX;
+				currentY+=iy;
+				if (currentY+iy>=currentY+maxY){
+					currentX=0;				
+				}
+				maxX = 0; maxY = 0;											
+			}
+			if (GUI.Button(Rect(currentX,currentY,ix,iy),item.items[0].sprite,TxGUI.Gui)){
 				selected = index;
 				if (Time.time> dclick+0.3){
 					dclick = Time.time;	
@@ -854,12 +861,11 @@ function OnGUI(){
 			}
 			if (item.count>1)
 				GUI.Label(Rect(currentX+5,currentY+5,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString());
-			//placeElement(currentX,currentY,maxX,maxY,Vector2(item.items[0].ISGet().x*mtp.ScaleIcons,item.items[0].ISGet().y*mtp.ScaleIcons),function(cx,cy,mX,mY){
-			//	currentX = cx;
-			//	currentY = cy;
-			//	maxX = mX;
-			//	maxY = mY;
-			//});
+			currentX+=ix;
+			if (maxY <= iy){
+				maxY = iy;
+				maxX += ix;
+			}
 			index++;
 			
 		}

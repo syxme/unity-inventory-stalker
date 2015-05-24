@@ -19,26 +19,9 @@ function Update () {
 		CameraR.transform.localPosition.y=1+(Mathf.Sin(Mathf.PI/2*i))*0.1;		
 		if (i>3)i=-1;	
 	}
-//left+(Mathf.Sin(Mathf.PI/2*i))*radius;
-// -1 ... 3
-	
 
-	if (prepos!=transform.rotation.eulerAngles.y){
-		if (prepos-transform.rotation.eulerAngles.y>0){
-			if (Mathf.Abs(prepos-transform.rotation.eulerAngles.y)>8)
-		  		RotateZ +=30*Time.deltaTime;
-		}
-		else{
-			if (Mathf.Abs(prepos-transform.rotation.eulerAngles.y)>8)
- 		  		RotateZ -= 30*Time.deltaTime;
- 		 }
-	    prepos =  transform.rotation.eulerAngles.y;
-	    
-	}else{
-		if (CameraR.transform.rotation.eulerAngles.z>=0)
-			RotateZ-=(3.75*RotateZ)*Time.deltaTime;
-	}
-	if (controller.velocity.magnitude > 15)
+
+	if (controller.velocity.magnitude > 20)
 		paden = true;
 	else{
 		if (paden){

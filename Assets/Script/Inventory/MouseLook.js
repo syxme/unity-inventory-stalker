@@ -12,6 +12,7 @@ enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
 	private var rotationY = 0.0;
 
 	function Update () {
+
 	if (!gameControl.ActivateGUI){
 		if (axes == RotationAxes.MouseXAndY){
 			var rotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * sensitivityX;
