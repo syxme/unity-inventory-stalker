@@ -92,7 +92,7 @@ class mathfWindow{
 	var Actives:Rect[];
 	var topout:float;
 	var topoutP:float;
-
+	var armor:Rect;
 	class infoRect{
 		var actorMoney:Rect;
 		var name:Rect;
@@ -124,10 +124,10 @@ class mathfWindow{
 		windowSizeP.y	= (SCRHeight-200)*0.86;
 		ScaleIcons		= windowSize.x * 0.00156;
 		border			= ((SCRWidth-300)*0.1)*0.0085;
-		
+		armor 			= Rect((SCRWidth-50)*0.87,35+(SCRHeight)*0.30,((SCRWidth-50)*0.10),SCRHeight*0.30);
 		inf.name		= Rect(SCRWidth*0.396,35+(SCRHeight)*0.445,SCRWidth/6.21,30);
 		inf.price		= Rect(SCRWidth*0.57, 35+(SCRHeight)*0.445,SCRWidth/10.6,30);
-		inf.actorMoney	= Rect(SCRWidth*0.705,35+(SCRHeight)*0.628,SCRWidth/10.6,30);
+		inf.actorMoney	= Rect((SCRWidth-50)*0.745,(SCRHeight-35)*0.6+35,(SCRWidth-50)/9.7,SCRHeight/18);
 		inf.description = Rect(SCRWidth*0.396,35+(SCRHeight)*0.525,windowSize.x-SizeBorder.x*2,200);	
 		
 		activeBackDrop	= Rect(100,0,SCRWidth-200,137);
@@ -476,12 +476,14 @@ function dropInActive(type:int,cb:Function){
 //******************************************
 function insertToActive(type:int,index:int){
 	dropInActive(type,function(){
+		print('YES');
 		Actives[type] = items[index].items[0];
 		drArray(index);
 		selected = -1;
 		getScript(Actives[type]._id.transform.parent.gameObject).ObjectActive();
 		getScript(Actives[type]._id.transform.parent.gameObject).enabled = true;
 	});
+	CalcElement();
 	audio.clip = soundFx.invInsert;
 	audio.Play();
 }
@@ -751,7 +753,7 @@ function OnGUI(){
 		}
 
 		if (Actives[2].name!="NULLITEM"){
-			if (GUI.Button(Rect(mtp.windowSize.x+mtp.SCRWidth*0.525,Screen.height*0.3,TxGUI.StandartArmor.width,TxGUI.StandartArmor.height),Actives[2].option.big_pre,TxGUI.Gui)){
+			if (GUI.Button(mtp.armor,Actives[2].option.big_pre,TxGUI.Gui)){
 				if (Time.time> dclick+0.3){
 					dclick = Time.time;	
 				}else{
@@ -759,7 +761,7 @@ function OnGUI(){
 				}
 			}
 		}else{
-			GUI.DrawTexture(Rect(mtp.windowSize.x+mtp.SCRWidth*0.515,Screen.height*0.3,TxGUI.StandartArmor.width,TxGUI.StandartArmor.height),TxGUI.StandartArmor,ScaleMode.StretchToFill);	
+			GUI.DrawTexture(mtp.armor,TxGUI.StandartArmor,ScaleMode.StretchToFill);	
 		}
 				
 		if (passActive.length>0){
@@ -773,7 +775,8 @@ function OnGUI(){
 		}
 		
 		scrollPosition = GUI.BeginScrollView (Rect (50+mtp.SizeBorder.x,mtp.topout,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
-			scrollLength = scrollLength<mtp.windowSize.y ? mtp.windowSizeP.y:scrollLength;
+			//GUI.DrawTexture(Rect(0,0,2000,2000),IMX);
+			scrollLength = scrollLength<mtp.windowSize.y ? mtp.windowSize.y:scrollLength;
 			DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
 			scrollLength = 0;
 			
@@ -781,7 +784,7 @@ function OnGUI(){
 			for(var item in items){
 				ix = (item.items[0].ISGet().x+1)*mtp.ScaleIcons;
 				iy = item.items[0].ISGet().y*mtp.ScaleIcons;
-				maxX = maxX == mtp.windowSizeP.x ? 0:maxX
+				maxX = maxX == mtp.windowSizeP.x ? 0:maxX;
 				if (mtp.round_to(currentX+ix)>mtp.round_to(mtp.windowSize.x)){
 					currentX=maxX;
 					currentY+=iy;
@@ -798,7 +801,8 @@ function OnGUI(){
 						dclick = Time.time;	
 					}
 				}
-				item.count > 1 ? GUI.Label(Rect(currentX+5,currentY+5,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString()):0;
+				if (item.count > 1)
+					GUI.Label(Rect(currentX+5,currentY+5,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString());
 
 				currentX+=ix;
 				if (maxY <= iy){
@@ -811,7 +815,7 @@ function OnGUI(){
 		GUI.EndScrollView ();
 
 		GUI.Label(mtp.inf.actorMoney, gameControl.actorMoney.ToString() ,TxGUI.GuiText);
-		GUI.DrawTexture(mtp.inf.actorMoney,IMX);
+		//GUI.DrawTexture(mtp.inf.actorMoney,IMX);
 		if (selected>=0){
 			var itm = items[selected].items[0];
 			GUI.Label(mtp.inf.name, itm.option.name,TxGUI.GuiText);
@@ -831,14 +835,14 @@ function OnGUI(){
 			GUI.DrawTexture(mtp.backDrop,TxGUI.backDropPay,ScaleMode.StretchToFill);
 			//GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
 			scrollPosition = GUI.BeginScrollView (Rect (65+mtp.SizeBorder.x,mtp.topoutP,mtp.windowSizeP.x, mtp.windowSizeP.y),scrollPosition, Rect (0, 0, 0, scrollLength));
-				scrollLength = scrollLength<mtp.windowSize.y ? mtp.windowSizeP.y:scrollLength;
+				scrollLength = scrollLength<mtp.windowSizeP.y ? mtp.windowSizeP.y:scrollLength;
 				DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,8);
 				scrollLength = 0;
 
 				for(var item in items){
 					ix = (item.items[0].ISGet().x+1)*mtp.ScaleIcons;
 					iy = item.items[0].ISGet().y*mtp.ScaleIcons;
-					maxX = maxX == mtp.windowSizeP.x ? 0:maxX
+					maxX = maxX == mtp.windowSizeP.x ? 0:maxX;
 					if (mtp.round_to(currentX+ix)>mtp.round_to(mtp.windowSizeP.x)){
 						currentX=maxX;
 						currentY+=iy;
@@ -856,7 +860,7 @@ function OnGUI(){
 								});
 							}else{
 								intToBox(item.items[0],function(){
-									drArray(index);
+									drArray(index); 
 									CalcElement();
 								});
 							}
@@ -864,7 +868,8 @@ function OnGUI(){
 						}
 					}
 				
-					item.count > 1 ? GUI.Label(Rect(currentX+5,currentY+5,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString()):0;
+					if (item.count > 1) 
+						GUI.Label(Rect(currentX+5,currentY+5,item.items[0].ISGet().x,item.items[0].ISGet().y), "x"+item.count.ToString());
 					currentX+= ix;
 					if (maxY <= iy){
 						maxY = iy;
