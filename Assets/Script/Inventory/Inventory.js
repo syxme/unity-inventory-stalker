@@ -16,8 +16,9 @@ class InventorySound{
 	var invDrop:AudioClip;
 }
 class gfgui{
-	var backDrop:Texture2D;
-	var backDropPay:Texture2D;
+	var background_inv:Texture2D;
+	var background_box:Texture2D;
+	var background_pay:Texture2D;
 	var activeBackDrop:Texture2D;
 	var StandartArmor:Texture2D;
 	var center:Texture2D;
@@ -89,6 +90,7 @@ class mathfWindow{
 	var windowSizeP:Vector2;
 	var SizeBorder:Vector2;
 	var ScaleIcons:float;
+	var ScaleIconsP:float;
 	var Actives:Rect[];
 	var topout:float;
 	var topoutP:float;
@@ -104,7 +106,9 @@ class mathfWindow{
 	var border:float;
 	var scrollLengthNext:float;
 	var activeBackDrop:Rect;
-	var backDrop:Rect;
+	var background:Rect;
+	var leftBox:Rect;
+	var RightBox:Rect;
 	function round_to(d){
 		d = Mathf.Floor(d);
 		var  i:int = d;
@@ -120,21 +124,23 @@ class mathfWindow{
 		slise 			= (Screen.width - SCRWidth)/2;
 		windowSize.x	= (SCRWidth-100)*0.325;
 		windowSize.y	= (SCRHeight-200)*0.92;
-		windowSizeP.x	= (SCRWidth-100)*0.26; 
-		windowSizeP.y	= (SCRHeight-200)*0.86;
+		windowSizeP.x	= (SCRWidth-100)*0.47; 
+		windowSizeP.y	= (SCRHeight-200)*0.915;
 		ScaleIcons		= windowSize.x * 0.00156;
+		ScaleIconsP		= windowSizeP.x * 0.00156;
 		border			= ((SCRWidth-300)*0.1)*0.0085;
 		armor 			= Rect((SCRWidth-50)*0.87,35+(SCRHeight)*0.30,((SCRWidth-50)*0.10),SCRHeight*0.30);
 		inf.name		= Rect(SCRWidth*0.396,35+(SCRHeight)*0.445,SCRWidth/6.21,30);
 		inf.price		= Rect(SCRWidth*0.57, 35+(SCRHeight)*0.445,SCRWidth/10.6,30);
 		inf.actorMoney	= Rect((SCRWidth-50)*0.745,(SCRHeight-35)*0.6+35,(SCRWidth-50)/9.7,SCRHeight/18);
 		inf.description = Rect(SCRWidth*0.396,35+(SCRHeight)*0.525,windowSize.x-SizeBorder.x*2,200);	
-		
 		activeBackDrop	= Rect(100,0,SCRWidth-200,137);
-		backDrop		= Rect(50,140,  SCRWidth-100, SCRHeight-200);
+		background		= Rect(50,140,  SCRWidth-100, SCRHeight-200);
 		topout			= ((SCRHeight-137)/16.74)+137;
-		topoutP			= ((SCRHeight-137)/10.2)+137;
+		topoutP			= ((SCRHeight-137)/17)+137;
 		SizeBorder.x	= (SCRWidth)*0.0145;
+		leftBox			= Rect ((SCRWidth*0.018)+50,topoutP,windowSizeP.x, windowSizeP.y);
+		RightBox		= Rect ((SCRWidth*0.509),topoutP,windowSizeP.x, windowSizeP.y);
 		scrollLengthNext= 64*ScaleIcons;
 	}
 	
@@ -364,7 +370,7 @@ function CalcElement(){
 		}
 	}
 
-	widthm  = showShop||paypal ? 512:640;
+	widthm  = showShop||paypal ? 896:640;
 
 	var xt = 0; var maxY = 0;
 	for (i= 0;i<=items.Length-2;i++){
@@ -730,7 +736,7 @@ function OnGUI(){
 		showShop = false;
 		gameControl.ActivateGUI = true;
 		GUI.DrawTexture(mtp.activeBackDrop,TxGUI.activeBackDrop,ScaleMode.StretchToFill);		
-		GUI.DrawTexture(mtp.backDrop,TxGUI.backDrop,ScaleMode.StretchToFill);
+		GUI.DrawTexture(mtp.background,TxGUI.background_inv,ScaleMode.StretchToFill);
 				
 		if (Actives[0].name!="NULLITEM"){
 			if (GUI.Button(Rect(mtp.SCRWidth/2-TxGUI.activeBackDrop.width/2+50,25,Actives[0].ISGet().x,Actives[0].ISGet().y),Actives[0].sprite,TxGUI.Gui)){
@@ -775,7 +781,7 @@ function OnGUI(){
 		}
 		
 		scrollPosition = GUI.BeginScrollView (Rect (50+mtp.SizeBorder.x,mtp.topout,mtp.windowSize.x, mtp.windowSize.y),scrollPosition, Rect (0, 0, 0, scrollLength));
-			//GUI.DrawTexture(Rect(0,0,2000,2000),IMX);
+			GUI.DrawTexture(Rect(0,0,2000,2000),IMX);
 			scrollLength = scrollLength<mtp.windowSize.y ? mtp.windowSize.y:scrollLength;
 			DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,10);
 			scrollLength = 0;
@@ -830,13 +836,16 @@ function OnGUI(){
 
 	
 	if (showShop){
+		mtp.init();
+
 		index = 0; goodShop = false; currentX = 0; currentY = 0; maxX = 0; maxY = 0; 
 		GUI.BeginGroup (Rect (mtp.slise,0,mtp.SCRWidth,Screen.height));
-			GUI.DrawTexture(mtp.backDrop,TxGUI.backDropPay,ScaleMode.StretchToFill);
-			//GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
-			scrollPosition = GUI.BeginScrollView (Rect (65+mtp.SizeBorder.x,mtp.topoutP,mtp.windowSizeP.x, mtp.windowSizeP.y),scrollPosition, Rect (0, 0, 0, scrollLength));
+			GUI.DrawTexture(mtp.background,TxGUI.background_box,ScaleMode.StretchToFill);
+
+			scrollPosition = GUI.BeginScrollView (mtp.leftBox,scrollPosition, Rect (0, 0, 0, scrollLength));
 				scrollLength = scrollLength<mtp.windowSizeP.y ? mtp.windowSizeP.y:scrollLength;
-				DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,8);
+				//GUI.DrawTexture(Rect(0,0,Screen.width,Screen.width),IMX);
+				DrawTiled(Rect(0,0,mtp.windowSizeP.x,scrollLength),TxGUI.grid,mtp.ScaleIcons,15);
 				scrollLength = 0;
 
 				for(var item in items){
@@ -883,9 +892,9 @@ function OnGUI(){
 			
 
 			index = 0; currentX = 0; currentY = 0; maxX = 0; maxY = 0;
-			scrollPositionx = GUI.BeginScrollView (Rect ((mtp.SCRWidth)*0.67+mtp.SizeBorder.x,mtp.topoutP,mtp.windowSizeP.x, mtp.windowSizeP.y),scrollPositionx, Rect (0, 0, 0, scrollLengthx));
+			scrollPositionx = GUI.BeginScrollView (mtp.RightBox,scrollPositionx, Rect (0, 0, 0, scrollLengthx));
 				if (scrollLength<mtp.windowSize.y) scrollLengthx=mtp.windowSizeP.y;
-				DrawTiled(Rect(0,0,mtp.windowSize.x,scrollLengthx),TxGUI.grid,mtp.ScaleIcons,8);
+				DrawTiled(Rect(0,0,mtp.windowSizeP.x,scrollLengthx),TxGUI.grid,mtp.ScaleIcons,15);
 				scrollLength = 0;
 
 				paypal = ShopGm.GetComponent(InventoryBox).paypal;
